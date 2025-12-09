@@ -1,3 +1,15 @@
+
+# API v1.4 Migration Project
+
+**Author:** Vijay Soundaram  
+**GitHub:** [@vijayyovan](https://github.com/vijayyovan)  
+**Date:** December 2025  
+**Portfolio Project**
+
+> 📌 **Note:** This documentation represents actual work completed by Vijay Yovan 
+> as part of production system development.  All content is original and copyrighted.
+
+
 # Lessons Learned: API v1.4 Migration
 
 > Key takeaways, best practices, and insights from migrating a production REST API from String-based to Map-based contract with circuit breaker implementation
