@@ -1,3 +1,14 @@
+# API v1.4 Migration Project
+
+**Author:** Vijay Soundaram  
+**GitHub:** [@vijayyovan](https://github.com/vijayyovan)  
+**Date:** December 2025  
+**Portfolio Project**
+
+> 📌 **Note:** This documentation represents actual work completed by Vijay Yovan 
+> as part of production system development.  All content is original and copyrighted.
+
+
 # API-v1.4-Migration
 
 # API v1.4 Migration Project
