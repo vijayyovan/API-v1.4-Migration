@@ -1,6 +1,6 @@
 # Implementation Guide: v1.3 → v1.4 Migration
 
-> Step-by-step approach to migrating EMA API from String-based to Map-based contract with circuit breaker implementation
+> Step-by-step approach to migrating EMA API from String-based to Map-based contract with circuit breaker implementation.
 
 ## Table of Contents
 
