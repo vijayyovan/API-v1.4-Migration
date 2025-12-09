@@ -1,6 +1,6 @@
 # API-v1.4-Migration
 
-# EMA API v1.4 Migration Project
+# API v1.4 Migration Project
 
 > Enterprise-grade migration from v1.3 to v1.4 API contract with Resilience4j circuit breaker implementation, Oracle stored procedure integration, and comprehensive fault tolerance.
 
