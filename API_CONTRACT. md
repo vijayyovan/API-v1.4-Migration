@@ -66,9 +66,9 @@ HTTP/1.1 202 Accepted
 Content-Type:  application/json
 
 {
-  "eventId": "EVT000013552428",
+  "eventId": "EVT000012345689",
   "status": "Active",
-  "etr": "2025-12-10T15:00:00Z",
+  "etr": "20xx-xx-10T15:00:00Z",
   ... 
 }
 ```
