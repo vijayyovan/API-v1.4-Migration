@@ -1,0 +1,815 @@
+# API Contract:  v1.3 vs v1.4 Comparison
+
+> Detailed comparison of API contracts, migration path, and compatibility considerations
+
+## Table of Contents
+
+1. [Contract Evolution Overview](#contract-evolution-overview)
+2. [Endpoint Comparison](#endpoint-comparison)
+3. [Response Structure Changes](#response-structure-changes)
+4. [Return Code Mapping](#return-code-mapping)
+5. [Breaking vs Non-Breaking Changes](#breaking-vs-non-breaking-changes)
+6. [Migration Strategy](#migration-strategy)
+7. [Client Impact Analysis](#client-impact-analysis)
+
+---
+
+## Contract Evolution Overview
+
+### What Changed?
+
+| Aspect | v1.3 | v1.4 | Reason |
+|--------|------|------|--------|
+| **Response Type** | String (raw JSON) | Map with codes | Structured error handling |
+| **Success Detection** | String contains check | Return code check | Explicit, type-safe |
+| **Error Handling** | String parsing | Structured codes | Clear contract |
+| **Fault Tolerance** | None | Circuit breaker | Resilience |
+| **Status Codes** | 202 (success), 404 | 200 (success), 404 | HTTP standard alignment |
+
+### Why Migrate?
+
+**Problems with v1.3:**
+- ❌ String parsing fragile (`contains("No Record Found")`)
+- ❌ No fault tolerance (cascading failures)
+- ❌ Unclear success/failure detection
+- ❌ Non-standard HTTP codes (202 for success)
+
+**Benefits of v1.4:**
+- ✅ Structured return codes (0, 1, 200, 204, 400)
+- ✅ Circuit breaker pattern (graceful degradation)
+- ✅ Clear contract (explicit codes)
+- ✅ Standard HTTP semantics (200 OK)
+
+---
+
+## Endpoint Comparison
+
+### EventDetail Endpoint
+
+#### v1.3 Contract
+
+**Endpoint:**
+```
+GET /event/v1.3/detail/{eventId}
+```
+
+**Request Headers:**
+```
+Session-ID: string (required)
+Transaction-ID: string (required)
+Client-ID: string (required)
+```
+
+**Response (Success):**
+```
+HTTP/1.1 202 Accepted
+Content-Type:  application/json
+
+{
+  "eventId": "EVT000013552428",
+  "status": "Active",
+  "etr": "2025-12-10T15:00:00Z",
+  ... 
+}
+```
+
+**Response (Not Found):**
+```
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+"No Record Found"  // ← String, not structured JSON! 
+```
+
+**Controller Implementation (v1.3):**
+```java
+@GetMapping("/{eventId}")
+public ResponseEntity<String> getEventDetailsById(... ) {
+    String result = eventDetailsService.getEventDetails(... );
+    
+    // String parsing to determine success/failure
+    if (result == null || result.isEmpty() || result.contains("No Record Found")) {
+        return new ResponseEntity<>(result, HttpStatus.NOT_FOUND);
+    }
+    
+    // Non-standard HTTP 202 for success
+    return new ResponseEntity<>(result, HttpStatus.ACCEPTED);
+}
+```
+
+**Problems:**
+- ❌ String `contains()` check is fragile
+- ❌ HTTP 202 is not standard for GET requests (should be 200)
+- ❌ No structured error responses
+- ❌ No fault tolerance
+
+---
+
+#### v1.4 Contract
+
+**Endpoint:**
+```
+GET /event/v1.4/detail/{eventId}
+```
+
+**Request Headers:**
+```
+Session-ID: string (required)
+Transaction-ID: string (required)
+Client-ID: string (required)
+```
+
+**Response (Success - Event Found):**
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "eventId": "EVT000013552428",
+  "status": "Active",
+  "etr": "2025-12-10T15:00:00Z",
+  ...
+}
+```
+
+**Response (Not Found):**
+```
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "error": "No Record Found"
+}
+```
+
+**Response (Service Unavailable - Circuit Breaker):**
+```
+HTTP/1.1 503 Service Unavailable
+Content-Type: application/json
+
+{
+  "error": "Service temporarily unavailable"
+}
+```
+
+**Controller Implementation (v1.4):**
+```java
+@GetMapping("/{eventId}")
+public ResponseEntity<String> getEventDetailsById(...) {
+    Map<String, Object> result = eventDetailsService.getEventDetailsContract(...);
+    
+    int returnCode = ((Number) result.get("RETURN_CODE")).intValue();
+    String body = (String) result.get("RESULTS_STRING");
+    
+    // Explicit return code mapping
+    switch (returnCode) {
+        case 0:   return ResponseEntity.status(404).body(body);  // Not found
+        case 1:   return ResponseEntity.ok().body(body);         // Success
+        case 200: return ResponseEntity.ok().body(body);         // Success (HTTP-style)
+        case 503: return ResponseEntity.status(503).body(body);  // Circuit breaker
+        default:  return ResponseEntity.status(500).body("{}");  // Unexpected
+    }
+}
+```
+
+**Improvements:**
+- ✅ Explicit return codes (no string parsing)
+- ✅ Standard HTTP 200 OK for success
+- ✅ Structured error responses
+- ✅ Circuit breaker with 503 fallback
+
+---
+
+### OutageDetail Endpoint
+
+#### v1.3 vs v1.4 Comparison
+
+| Aspect | v1.3 | v1.4 |
+|--------|------|------|
+| **Endpoint** | `/outages/v1.3/detail` | `/outages/v1.4/detail` |
+| **Query Params** | `accountNumber`, `divisionId` | Same |
+| **Success Code** | 202 Accepted | 200 OK |
+| **No Outages** | 404 with error message | 204 No Content (no body) |
+| **Invalid Account** | 404 with error message | 400 Bad Request |
+| **Circuit Breaker** | N/A (not implemented) | 503 Service Unavailable |
+
+#### v1.4 Scenarios
+
+**Scenario 1: Account with Outages**
+```
+Request:
+GET /outages/v1.4/detail?accountNumber=8301100010081880&divisionId=BHR. 8301
+
+SP Returns:  RETURN_CODE = 200
+
+Response:
+HTTP/1.1 200 OK
+{
+  "eventId": "EVT123",
+  "etr": "2025-12-10T15:00:00Z",
+  "condition": "Confirmed",
+  ... 
+}
+```
+
+**Scenario 2: Valid Account, Zero Outages**
+```
+Request:
+GET /outages/v1.4/detail?accountNumber=1234567890&divisionId=TEST.123
+
+SP Returns: RETURN_CODE = 204
+
+Response:
+HTTP/1.1 204 No Content
+(no body)
+```
+
+**Scenario 3: Invalid Account**
+```
+Request:
+GET /outages/v1.4/detail?accountNumber=INVALID&divisionId=BAD.999
+
+SP Returns: RETURN_CODE = 400
+
+Response:
+HTTP/1.1 400 Bad Request
+{
+  "error":  "Account does not exist"
+}
+```
+
+---
+
+### OutageHistory Endpoint
+
+#### v1.3 vs v1.4 Comparison
+
+| Aspect | v1.3 | v1.4 |
+|--------|------|------|
+| **Endpoint** | `/outages/v1.3/history` | `/outages/v1.4/history` |
+| **Query Params** | `accountNumber`, `divisionId` | Same + optional filters |
+| **Success Code** | 202 Accepted | 200 OK |
+| **No History** | 404 with error message | 204 No Content |
+| **Response Format** | String (JSON array) | String (JSON array) with structured codes |
+| **Circuit Breaker** | N/A | 503 Service Unavailable |
+
+---
+
+## Response Structure Changes
+
+### v1.3 Response Structure
+
+**Service Layer Return Type:**
+```java
+public String getEventDetails(... ) {
+    // Returns raw JSON string from stored procedure
+    return rawJsonString;
+}
+```
+
+**Example Return Values:**
+```
+Success: 
+"{\"eventId\":\"EVT123\",\"status\":\"Active\",...  }"
+
+Not Found:
+"No Record Found"
+
+Error:
+"Error retrieving data"
+```
+
+**Problem:** No way to distinguish between success and failure without parsing the string.
+
+---
+
+### v1.4 Response Structure
+
+**Service Layer Return Type:**
+```java
+public Map<String, Object> getEventDetailsContract(... ) {
+    // Returns structured map with explicit return code
+    return Map.of(
+        "RETURN_CODE", 1,
+        "RESULTS_STRING", "{\"eventId\":\"EVT123\",...  }"
+    );
+}
+```
+
+**Map Structure:**
+```java
+Map<String, Object> {
+    "RETURN_CODE":     Integer/Number (0, 1, 200, 204, 400, 503)
+    "RESULTS_STRING":  String (JSON response body)
+}
+```
+
+**Example Return Values:**
+
+**Success (Oracle style):**
+```java
+{
+    "RETURN_CODE": 1,
+    "RESULTS_STRING": "{\"eventId\":\"EVT123\",\"status\":\"Active\"}"
+}
+```
+
+**Success (HTTP style):**
+```java
+{
+    "RETURN_CODE": 200,
+    "RESULTS_STRING": "{\"eventId\":\"EVT123\",\"status\":\"Active\"}"
+}
+```
+
+**Not Found:**
+```java
+{
+    "RETURN_CODE": 0,
+    "RESULTS_STRING": "{\"error\":\"No Record Found\"}"
+}
+```
+
+**No Content:**
+```java
+{
+    "RETURN_CODE": 204,
+    "RESULTS_STRING": null  // or empty string
+}
+```
+
+**Bad Request:**
+```java
+{
+    "RETURN_CODE": 400,
+    "RESULTS_STRING": "{\"error\":\"Invalid account number\"}"
+}
+```
+
+**Circuit Breaker Fallback:**
+```java
+{
+    "RETURN_CODE":  503,
+    "RESULTS_STRING": "{\"error\":\"Service temporarily unavailable\"}"
+}
+```
+
+---
+
+## Return Code Mapping
+
+### Complete Return Code Matrix
+
+| SP Return Code | Meaning | v1.3 HTTP Response | v1.4 HTTP Response | Response Body |
+|----------------|---------|-------------------|-------------------|---------------|
+| **0** | Event/record not found | 404 Not Found | 404 Not Found | `{"error":"No Record Found"}` |
+| **1** | Success (Oracle convention) | 202 Accepted | 200 OK | Event/outage JSON data |
+| **200** | Success (HTTP-style) | N/A (not used) | 200 OK | Event/outage JSON data |
+| **202** | Success (legacy) | 202 Accepted | 200 OK | Event/outage JSON data |
+| **204** | No content available | N/A | 204 No Content | No body |
+| **400** | Bad request/invalid input | 404 Not Found | 400 Bad Request | `{"error":"Invalid input"}` |
+| **404** | Not found (legacy) | 404 Not Found | 404 Not Found | `{"error":"Not found"}` |
+| **503** | Service unavailable | N/A | 503 Service Unavailable | `{"error":"Service unavailable"}` |
+| **Other** | Unexpected | 500 Internal Server Error | 500 Internal Server Error | `{"error":"Internal server error"}` |
+
+### Why Multiple Success Codes?
+
+**Current Implementation (Oracle SP returns 1):**
+```
+SP returns 1 → Controller case 1: → HTTP 200 OK
+```
+
+**Future Implementation (SP may return 200):**
+```
+SP returns 200 → Controller case 200: → HTTP 200 OK
+```
+
+**Legacy Support (Transition period):**
+```
+SP returns 202 → Controller case 202: → HTTP 200 OK
+```
+
+**Rationale:**
+- Oracle stored procedures traditionally use `0/1` for failure/success
+- Future SP versions may migrate to HTTP-style codes (`200`, `404`, etc.)
+- v1.4 supports both for smooth transition
+
+---
+
+## Breaking vs Non-Breaking Changes
+
+### Breaking Changes (Require Client Updates)
+
+#### 1. HTTP Status Code Change for Success
+
+**v1.3:** 
+```
+HTTP/1.1 202 Accepted
+```
+
+**v1.4:**
+```
+HTTP/1.1 200 OK
+```
+
+**Client Impact:**
+- Clients checking for `status == 202` will break
+- **Mitigation:** Update clients to accept `200` or `202`
+
+#### 2. Error Response Structure
+
+**v1.3:**
+```
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+"No Record Found"  // Plain string
+```
+
+**v1.4:**
+```
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "error": "No Record Found"
+}  // Structured JSON
+```
+
+**Client Impact:**
+- Clients parsing plain string will break
+- **Mitigation:** Update error handling to parse JSON
+
+#### 3. New Response Code:  204 No Content
+
+**v1.3:** Not used
+
+**v1.4:**
+```
+HTTP/1.1 204 No Content
+(no body)
+```
+
+**Client Impact:**
+- Clients expecting body for all responses may break
+- **Mitigation:** Handle 204 with no body parsing
+
+#### 4. New Response Code: 503 Service Unavailable
+
+**v1.3:** Not used (application crashes or times out)
+
+**v1.4:**
+```
+HTTP/1.1 503 Service Unavailable
+{
+  "error": "Service temporarily unavailable"
+}
+```
+
+**Client Impact:**
+- Clients should implement retry logic
+- **Mitigation:** Add exponential backoff retry
+
+---
+
+### Non-Breaking Changes (Backward Compatible)
+
+#### 1. Endpoint Versioning
+
+**Both endpoints coexist:**
+```
+/event/v1.3/detail/{id}  → v1.3 implementation
+/event/v1.4/detail/{id}  → v1.4 implementation
+```
+
+**Client Impact:** None (clients continue using v1.3)
+
+#### 2. Request Headers (Unchanged)
+
+**Both v1.3 and v1.4:**
+```
+Session-ID: required
+Transaction-ID: required
+Client-ID: required
+```
+
+**Client Impact:** None
+
+#### 3. Success Response Body (Unchanged)
+
+**Both v1.3 and v1.4:**
+```json
+{
+  "eventId":  "EVT000013552428",
+  "status": "Active",
+  "etr": "2025-12-10T15:00:00Z",
+  ... 
+}
+```
+
+**Client Impact:** None (same JSON structure)
+
+---
+
+## Migration Strategy
+
+### Phase 1: Parallel Deployment (Current State)
+
+```
+┌──────────────────────────────────────────────┐
+│            Client Applications                │
+└─────────────┬───────────────┬────────────────┘
+              │               │
+              │               │
+      v1.3 calls              v1.4 calls
+              │               │
+              ▼               ▼
+┌──────────────────┐  ┌──────────────────┐
+│  v1.3 Endpoints  │  │  v1.4 Endpoints  │
+│  (Legacy)        │  │  (New)           │
+└──────────────────┘  └──────────────────┘
+```
+
+**Duration:** 3-6 months  
+**Status:** Both versions active
+
+---
+
+### Phase 2: Client Migration
+
+**Week 1-2: Internal Testing**
+- Update test clients to v1.4
+- Validate all scenarios
+- Monitor error rates
+
+**Week 3-4: Canary Deployment**
+- Route 10% of traffic to v1.4
+- Monitor metrics
+- Compare v1.3 vs v1.4 behavior
+
+**Week 5-8:  Gradual Rollout**
+- 25% → 50% → 75% → 100%
+- Client-by-client migration
+- Support team trained on new errors
+
+**Week 9-12: Monitoring**
+- Ensure v1.3 traffic drops to 0%
+- Validate all clients migrated
+
+---
+
+### Phase 3: v1.3 Deprecation
+
+**Month 4:  Deprecation Notice**
+```
+HTTP/1.1 200 OK
+X-API-Deprecation: true
+X-API-Sunset: 2026-06-01
+Link: </event/v1.4/detail>; rel="successor-version"
+
+{
+  "eventId": ".. .",
+  ... 
+}
+```
+
+**Month 5: Warning Logs**
+- Log all v1.3 requests
+- Notify client teams
+
+**Month 6: v1.3 Shutdown**
+- Remove v1.3 endpoints
+- Return 410 Gone for v1.3 requests
+
+---
+
+## Client Impact Analysis
+
+### Client Type 1: Web Application (JavaScript)
+
+**v1.3 Code:**
+```javascript
+fetch('/event/v1.3/detail/EVT123', {
+  headers: {
+    'Session-ID': sessionId,
+    'Transaction-ID': txnId,
+    'Client-ID': 'web-app'
+  }
+})
+.then(response => {
+  if (response.status === 202) {  // ← Checking for 202
+    return response. json();
+  } else if (response.status === 404) {
+    throw new Error('Not found');
+  }
+})
+```
+
+**v1.4 Migration:**
+```javascript
+fetch('/event/v1.4/detail/EVT123', {
+  headers: {
+    'Session-ID': sessionId,
+    'Transaction-ID': txnId,
+    'Client-ID': 'web-app'
+  }
+})
+.then(response => {
+  if (response.status === 200) {  // ← Changed to 200
+    return response.json();
+  } else if (response.status === 404) {
+    return response.json().then(err => {
+      throw new Error(err.error);  // ← Parse JSON error
+    });
+  } else if (response.status === 503) {  // ← New:  Handle circuit breaker
+    console.log('Service unavailable, retrying...');
+    return retryWithBackoff();
+  }
+})
+```
+
+**Changes Required:**
+1. Update success check:  `202` → `200`
+2. Parse error responses as JSON
+3. Add 503 retry logic
+
+---
+
+### Client Type 2: Mobile App (iOS/Android)
+
+**v1.3 Code (Swift):**
+```swift
+URLSession.shared.dataTask(with: request) { data, response, error in
+    guard let httpResponse = response as? HTTPURLResponse else { return }
+    
+    if httpResponse.statusCode == 202 {  // ← Checking for 202
+        // Parse success response
+        let event = try?  JSONDecoder().decode(Event.self, from: data!)
+    } else if httpResponse.statusCode == 404 {
+        // Handle not found
+        showError("Not found")
+    }
+}
+```
+
+**v1.4 Migration:**
+```swift
+URLSession.shared.dataTask(with: request) { data, response, error in
+    guard let httpResponse = response as? HTTPURLResponse else { return }
+    
+    switch httpResponse.statusCode {
+    case 200:  // ← Changed from 202
+        let event = try? JSONDecoder().decode(Event.self, from: data!)
+        
+    case 404:
+        let error = try? JSONDecoder().decode(ErrorResponse.self, from: data!)
+        showError(error?.error ?? "Not found")
+        
+    case 503:  // ← New: Circuit breaker
+        retryAfterDelay(seconds: 5)
+        
+    default:
+        showError("Unexpected error")
+    }
+}
+```
+
+**Changes Required:**
+1. Update success case: `202` → `200`
+2. Create `ErrorResponse` model for structured errors
+3. Implement retry logic for 503
+
+---
+
+### Client Type 3: Backend Service (Java/Spring)
+
+**v1.3 Code:**
+```java
+ResponseEntity<String> response = restTemplate.exchange(
+    "/event/v1.3/detail/{id}",
+    HttpMethod.GET,
+    entity,
+    String.class,
+    eventId
+);
+
+if (response.getStatusCode() == HttpStatus.ACCEPTED) {  // 202
+    String eventJson = response.getBody();
+    // Process event
+} else if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+    // Handle not found
+}
+```
+
+**v1.4 Migration:**
+```java
+ResponseEntity<String> response = restTemplate.exchange(
+    "/event/v1.4/detail/{id}",
+    HttpMethod.GET,
+    entity,
+    String.class,
+    eventId
+);
+
+switch (response.getStatusCode()) {
+    case OK:  // 200
+        String eventJson = response.getBody();
+        // Process event
+        break;
+        
+    case NOT_FOUND:   // 404
+        ErrorResponse error = objectMapper.readValue(
+            response.getBody(), 
+            ErrorResponse.class
+        );
+        throw new EventNotFoundException(error.getError());
+        
+    case SERVICE_UNAVAILABLE:  // 503
+        // Circuit breaker triggered, retry with backoff
+        retryWithExponentialBackoff();
+        break;
+        
+    default:
+        throw new UnexpectedResponseException(response.getStatusCode());
+}
+```
+
+**Changes Required:**
+1. Change success check: `ACCEPTED` → `OK`
+2. Add `ErrorResponse` class
+3. Implement 503 retry logic with exponential backoff
+
+---
+
+## Migration Checklist for Clients
+
+### Pre-Migration
+
+- [ ] Review v1.4 contract documentation
+- [ ] Identify all API calls to v1.3
+- [ ] Create test environment with v1.4 endpoint
+- [ ] Update error handling models
+
+### Code Changes
+
+- [ ] Update success status check:  `202` → `200`
+- [ ] Parse error responses as JSON objects (not strings)
+- [ ] Add 204 No Content handling (no body parsing)
+- [ ] Add 503 Service Unavailable handling (retry logic)
+- [ ] Update endpoint URLs:  `v1.3` → `v1.4`
+
+### Testing
+
+- [ ] Test success scenarios (200 OK)
+- [ ] Test not found scenarios (404)
+- [ ] Test invalid input (400)
+- [ ] Test no content scenarios (204)
+- [ ] Test circuit breaker (503) with retries
+- [ ] Performance testing (compare v1.3 vs v1.4)
+
+### Deployment
+
+- [ ] Deploy to dev environment
+- [ ] Deploy to staging environment
+- [ ] Canary deployment (10% traffic)
+- [ ] Monitor error rates
+- [ ] Full production rollout
+- [ ] Remove v1.3 dependencies
+
+---
+
+## Compatibility Matrix
+
+| Client Version | v1.3 API | v1.4 API | Notes |
+|----------------|----------|----------|-------|
+| **Legacy (pre-2025)** | ✅ Compatible | ❌ Incompatible | Must use v1.3 |
+| **Updated (2025 Q1)** | ✅ Compatible | ✅ Compatible | Can use either |
+| **Future (2025 Q2+)** | ⚠️ Deprecated | ✅ Compatible | Should use v1.4 |
+
+---
+
+## Conclusion
+
+### Key Takeaways
+
+1. **v1.4 is more robust:**
+   - Structured return codes
+   - Circuit breaker fault tolerance
+   - Standard HTTP semantics
+
+2. **Migration requires client updates:**
+   - Status code changes (202 → 200)
+   - Error response structure
+   - New status codes (204, 503)
+
+3. **Gradual migration strategy:**
+   - Parallel deployment (both versions)
+   - Client-by-client migration
+   - v1.3 deprecation after 6 months
+
+4. **Benefits outweigh costs:**
+   - Better error handling
+   - Improved resilience
+   - Clearer contract
+   - Production-ready architecture
+
