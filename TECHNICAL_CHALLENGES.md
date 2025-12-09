@@ -1,6 +1,6 @@
 # Technical Challenges & Solutions
 
-> Detailed problem-solving journey for the EMA API v1.4 migration project
+> Detailed problem-solving journey for the API v1.4 migration project
 
 ## Overview
 
