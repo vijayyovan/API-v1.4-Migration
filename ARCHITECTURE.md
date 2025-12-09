@@ -1,6 +1,6 @@
-# Architecture Overview:  EMA API v1.4
+# Architecture Overview:  API v1.4
 
-> System design, patterns, and architectural decisions for the v1.4 migration
+> System design, patterns, and architectural decisions for the v1.4 migration.
 
 ## Table of Contents
 
