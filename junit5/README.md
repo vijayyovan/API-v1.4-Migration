@@ -660,7 +660,7 @@ These tests demonstrate:
 
 For questions about the testing approach or specific test cases:
 
-**Author:** Vijay Yovan  
+**Author:** Vijay Soundaram  
 **GitHub:** [@vijayyovan](https://github.com/vijayyovan)  
 **Portfolio:** API v1.4 Migration Project
 
