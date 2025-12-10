@@ -45,7 +45,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
  * - Database connectivity testing
  * - Resource management verification
  * - Exception handling testing
- * - State transition testing
+ * -- State transition testing
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("HealthService - Business Logic Tests")
