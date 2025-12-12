@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ema-api-config
+  namespace: ema
+data:
+  # Database connection URL (replace with your actual database host and service name)
+  database.url: "jdbc:oracle:thin:@//your-database-host:1521/your-service-name"
+  
+  # Application properties
+  application.properties: |
+    # Server configuration
+    server.port=8008
+    server.servlet.context-path=/net-ops/ema
+    
+    # HikariCP configuration
+    spring. datasource.hikari.maximum-pool-size=20
+    spring.datasource.hikari.minimum-idle=5
+    spring. datasource.hikari.connection-timeout=30000
+    spring. datasource.hikari.idle-timeout=600000
+    spring. datasource.hikari.max-lifetime=1800000
+    
+    # Actuator configuration
+    management.endpoints.web.exposure. include=health,info,metrics,mappings
+    management.endpoint.health.show-details=always
+    
+    # Logging
+    logging.level.root=INFO
+    logging. level.com.charter.ema=DEBUG
+    logging.pattern. console=%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
