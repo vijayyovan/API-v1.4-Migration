@@ -4,6 +4,11 @@ This document outlines the technical challenges encountered during the deploymen
 
 ---
 
+**Technologies:** Spring Boot, Kubernetes, Docker, HikariCP, Oracle Database  
+**Version:** v1.4  
+**Status:** ✅ Production-Ready
+
+
 ## Table of Contents
 
 1. [Docker Image Configuration Issues](#1-docker-image-configuration-issues)
