@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ema-api-v1-4
+  namespace: ema
+  labels:
+    app: ema-api
+    version: v1-4
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: ema-api
+      version: v1-4
+  template:
+    metadata:
+      labels:
+        app: ema-api
+        version: v1-4
+    spec:
+      containers:
+      - name: ema-api
+        # Replace with your actual image registry and tag
+        image: your-registry. example.com/ema-api:v1.4-latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8008
+          protocol: TCP
+        
+        # Environment variables
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "uat"
+        - name: SERVER_PORT
+          value: "8008"
+        - name: SERVER_SERVLET_CONTEXT_PATH
+          value: "/net-ops/ema"
+        
+        # Database configuration
+        - name: SPRING_DATASOURCE_URL
+          valueFrom:
+            configMapKeyRef:
+              name:  ema-api-config
+              key: database. url
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: ema-db-secret
+              key: username
+        - name:  SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ema-db-secret
+              key:  password
+        
+        # HikariCP configuration
+        - name:  SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+          value: "20"
+        - name: SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
+          value: "5"
+        - name: SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT
+          value: "30000"
+        - name: SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT
+          value: "600000"
+        - name: SPRING_DATASOURCE_HIKARI_MAX_LIFETIME
+          value: "1800000"
+        
+        # Actuator endpoints
+        - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+          value: "health,info,metrics,mappings"
+        
+        # Liveness probe
+        livenessProbe:
+          httpGet:
+            path: /net-ops/ema/health/v1.4/liveness
+            port: 8008
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        # Readiness probe
+        readinessProbe:
+          httpGet:
+            path: /net-ops/ema/hello/v1.4/helloworld
+            port: 8008
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        # Startup probe
+        startupProbe: 
+          httpGet:
+            path: /net-ops/ema/health/v1.4/readiness
+            port: 8008
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+        
+        # Resource limits
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits: 
+            memory: "2Gi"
+            cpu: "1000m"
+      
+      # Image pull secrets (if using private registry)
+      imagePullSecrets:
+      - name: registry-secret
