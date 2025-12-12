@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ema-api-v1-4-svc
+  namespace: ema
+  labels:
+    app: ema-api
+    version: v1-4
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8008
+    targetPort: 8008
+    protocol: TCP
+  selector:
+    app: ema-api
+    version: v1-4
