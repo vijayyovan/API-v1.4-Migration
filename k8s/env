@@ -1,0 +1,18 @@
+# EMA API v1.4 - Environment Variables Template
+# 
+# INSTRUCTIONS:
+# 1. Copy this file to .env:  cp .env.template .env
+# 2. Fill in your actual values in the .env file
+# 3. NEVER commit .env to Git (it's in .gitignore)
+
+# Application Profile
+SPRING_PROFILES_ACTIVE=local
+
+# Database Configuration
+# Replace with your actual database connection details
+SPRING_DATASOURCE_URL=jdbc:oracle:thin:@//your-database-host:1521/your-service-name
+DB_USERNAME=your_db_username
+DB_PASSWORD=your_db_password
+
+# Optional: Custom port (default is 8008)
+# SERVER_PORT=8008
