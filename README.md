@@ -85,7 +85,7 @@ The Enterprise Management API (EMA) provides real-time outage and event informat
 ## 📚 Documentation
 
 ### Core Documentation
-- [📋 **API Contract**](./API_CONTRACT.md) - v1.3 vs v1.4 comparison
+- [📋 **API Contract**](./API_CONTRACT. md) - v1.3 vs v1.4 comparison
 - [🏗️ **Architecture**](./ARCHITECTURE.md) - System design and patterns
 - [🚀 **Implementation Guide**](./IMPLEMENTATION_GUIDE.md) - Step-by-step migration process
 - [🐛 **Technical Challenges**](./TECHNICAL_CHALLENGES.md) - Problems solved with solutions
