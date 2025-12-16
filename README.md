@@ -9,10 +9,6 @@
 > as part of production system development.  All content is original and copyrighted.
 
 
-# API-v1.4-Migration
-
-# API v1.4 Migration Project
-
 > Enterprise-grade migration from v1.3 to v1.4 API contract with Resilience4j circuit breaker implementation, Oracle stored procedure integration, and comprehensive fault tolerance.
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.2-brightgreen. svg)](https://spring.io/projects/spring-boot)
@@ -28,6 +24,23 @@ Successfully migrated three critical REST API endpoints from v1.3 (String-based)
 
 The Enterprise Management API (EMA) provides real-time outage and event information to customer service applications. The v1.4 migration introduced structured response codes from Oracle stored procedures, requiring a complete refactoring of response handling logic.
 
+Two-phase enterprise API modernization project
+
+Complete enterprise API modernization covering application layer, database optimization, and cloud infrastructure deployment. 
+
+## 🏗️ Project Phases
+
+### [Phase 1: Application Layer Migration →](./spring-boot-migration/)
+**Focus:** Spring Boot, Resilience4j, Circuit Breaker  
+**Skills:** Java 17, Fault Tolerance, API Design  
+**Highlights:** Zero-downtime migration, 65% performance improvement
+
+### [Phase 2: Database & Infrastructure →](./database-infrastructure/)
+**Focus:** Oracle PL/SQL, Kubernetes, HTTP Standards  
+**Skills:** Database Development, DevOps, Testing  
+**Highlights:** Response code standardization, HA deployment, 100% test coverage
+
+
 ## 🏆 Key Achievements
 
 - ✅ **Zero-downtime migration** of 3 production endpoints
@@ -36,25 +49,72 @@ The Enterprise Management API (EMA) provides real-time outage and event informat
 - ✅ **65% performance improvement** via Oracle result caching
 - ✅ **Comprehensive error handling** with GUID-based request tracking
 
-## 📊 Results & Metrics
+## 🎯 Combined Impact
 
 | Metric | Value |
 |--------|-------|
-| **Endpoints Migrated** | 3 (EventDetail, OutageDetail, OutageHistory) |
-| **Code Coverage** | 8 return codes handled (0, 1, 200, 202, 204, 400, 404, default) |
-| **Performance** | 606ms - 3.4s (with caching:  65% improvement) |
-| **Availability** | Circuit breaker with fallback (503 on failure) |
-| **Error Rate** | 0% post-implementation |
-| **Backward Compatibility** | 100% maintained |
+| **Endpoints Migrated** | 3 production APIs |
+| **Response Time** | 65% improvement (caching) |
+| **Test Coverage** | 46+ scenarios, 100% pass rate |
+| **Deployment** | Kubernetes with 6-node HA |
+| **Availability** | Circuit breaker + load balancing |
+| **Error Handling** | Comprehensive (8+ return codes) |
 
-## 🛠️ Technology Stack
+---
 
-- **Framework:** Spring Boot 3.3.2
-- **Language:** Java 17
-- **Resilience:** Resilience4j 2.0.2 (Circuit Breaker pattern)
-- **Database:** Oracle 19c with stored procedures
-- **Build Tool:** Maven 3.9.x
-- **Testing:** Spring Test, JUnit 5
+## 💼 Skills Demonstrated
+
+**Backend Development:**
+- Spring Boot 3.x, Java 17
+- Oracle PL/SQL, Stored Procedures
+- RESTful API Design & Versioning
+
+**Resilience & Reliability:**
+- Circuit Breaker Pattern (Resilience4j)
+- Fault Tolerance & Fallback Strategies
+- Error Handling & Logging
+
+**DevOps & Infrastructure:**
+- Kubernetes Deployment
+- Rancher Orchestration
+- Load Balancing & High Availability
+- Ingress Configuration
+
+**Testing & Quality:**
+- Comprehensive Test Scenarios (46+)
+- Performance Benchmarking
+- Integration Testing
+- Production Validation
+
+---
+
+## 📚 Documentation
+
+**Application Layer:**
+- [Technical Challenges](./spring-boot-migration/TECHNICAL_CHALLENGES.md)
+- [Implementation Guide](./spring-boot-migration/IMPLEMENTATION_GUIDE. md)
+- [Code Samples](./spring-boot-migration/code-samples/)
+
+**Database & Infrastructure:**
+- [API Response Code Standards](./database-infrastructure/docs/API_RESPONSE_CODES.md)
+- [Stored Procedure Changes](./database-infrastructure/docs/STORED_PROCEDURE_CHANGES.md)
+- [Kubernetes Deployment](./database-infrastructure/kubernetes/)
+- [Test Scenarios](./database-infrastructure/tests/test-scenarios/)
+
+---
+
+## 🚀 Quick Links
+
+- [View Spring Boot Migration →](./spring-boot-migration/)
+- [View Database Work →](./database-infrastructure/)
+- [View Combined Architecture →](./COMBINED_OVERVIEW.md)
+- [View All Test Results →](./database-infrastructure/tests/)
+
+---
+
+**Author:** Vijay Soundaram  
+**GitHub:** [@vijayyovan](https://github.com/vijayyovan)  
+**Contact:** [Your LinkedIn/Email]
 
 ## 📁 Repository Contents
 
