@@ -627,14 +627,29 @@ This repository showcases real-world enterprise software engineering, demonstrat
 
 ---
 
-## 📞 Contact
+#---
 
-**Vijay Soundaram**  
-**GitHub:** [@vijayyovan](https://github.com/vijayyovan) 
+---
 
-**LinkedIn:**https://www.linkedin.com/in/vijaysoundaram/
+## 📞 Seeking DevOps/Platform Engineering Roles
 
-**Email:** vijay6206@gmail.com
+**Vijay Soundaram** | DevOps Engineer | CKA Certified
+
+- 🐙 **GitHub:** [@vijayyovan](https://github.com/vijayyovan) - See my Kubernetes deployments & CI/CD work
+- 💼 **LinkedIn:** [linkedin.com/in/vijaysoundaram](https://www.linkedin.com/in/vijaysoundaram/)
+- ✉️ **Email:** [vijay6206@gmail.com](mailto:vijay6206@gmail.com)
+
+### 🎯 Target Roles
+**DevOps Engineer** • **Platform Engineer** • **Site Reliability Engineer (SRE)** • **Cloud Infrastructure Engineer**
+
+### 🛠️ Key Expertise
+☸️ Kubernetes (CKA) • 🔄 CI/CD (Jenkins, GitLab) • 🏗️ IaC (Terraform, Ansible) • 📊 Monitoring (Splunk, Prometheus) • ☁️ Cloud-Native Architecture • 🔧 Container Orchestration (Rancher, Docker)
+
+**17+ years** building and maintaining enterprise-grade infrastructure at scale.
+
+---
+
+
 ---
 
 ## 📄 License
