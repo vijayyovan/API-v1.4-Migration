@@ -630,8 +630,10 @@ This repository showcases real-world enterprise software engineering, demonstrat
 ## 📞 Contact
 
 **Vijay Soundaram**  
-**GitHub:** [@vijayyovan](https://github.com/vijayyovan)  
+**GitHub:** [@vijayyovan](https://github.com/vijayyovan) 
+
 **LinkedIn:**https://www.linkedin.com/in/vijaysoundaram/
+
 **Email:** vijay6206@gmail.com
 ---
 
