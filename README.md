@@ -80,6 +80,13 @@ The Enterprise Management API (EMA) provides real-time outage and event informat
 - ✅ **Performance Testing** - Benchmarking, optimization validation
 - ✅ **Integration Testing** - End-to-end validation
 
+### Monitoring & Reliability
+- ✅ **Splunk** - Custom dashboards, SPL queries, real-time alerting
+- ✅ **Observability** - Metrics, logging, distributed tracing
+- ✅ **SLA Monitoring** - Response time tracking, error rate analysis
+- ✅ **Incident Response** - Alert configuration, escalation policies
+
+ Production reliability tracking through custom Splunk dashboards monitoring API health, error rates, and circuit breaker metrics.
 ---
 
 ## 📚 Documentation
@@ -263,6 +270,82 @@ Oracle SP Returns:        Maps To:
 ├─ 400 (bad request) →   HTTP 400 Bad Request
 └─ Other codes       →   HTTP 500 Internal Server Error
 ```
+
+
+---
+
+## 📊 Monitoring & Observability
+
+### Splunk Integration
+
+Production reliability tracking through custom Splunk dashboards monitoring API health, error rates, and circuit breaker metrics.
+
+#### Real-Time Error Rate Dashboard
+
+**SPL Query for Error Rate Tracking:**
+```splunk
+index=app_logs sourcetype=ema_api_v1_4 env=PROD
+| stats count as total_requests, 
+        count(eval(status_code>=500)) as server_errors, 
+        count(eval(status_code>=400 AND status_code<500)) as client_errors 
+| eval error_rate_percent = round((server_errors / total_requests) * 100, 2)
+| where error_rate_percent > 1.0
+| table _time, total_requests, server_errors, error_rate_percent
+```
+
+#### Circuit Breaker Health Monitoring
+
+**SPL Query for Circuit Breaker State:**
+```splunk
+index=app_logs sourcetype=ema_api_v1_4 "Circuit breaker"
+| rex field=_raw "Circuit breaker (?<cb_state>OPEN|CLOSED|HALF_OPEN)"
+| stats count by cb_state, circuit_breaker_name
+| eval alert_level = if(cb_state="OPEN", "CRITICAL", "OK")
+```
+
+#### API Response Time Percentiles
+
+**SPL Query for Performance Tracking:**
+```splunk
+index=app_logs sourcetype=ema_api_v1_4 endpoint="/event/v1.4/detail/*"
+| stats perc50(response_time_ms) as p50,
+        perc95(response_time_ms) as p95,
+        perc99(response_time_ms) as p99,
+        avg(response_time_ms) as avg_time
+| eval p95_breach = if(p95 > 1000, "WARNING", "OK")
+```
+
+### Key Metrics Tracked
+
+| Metric | Threshold | Alert Level |
+|--------|-----------|-------------|
+| Error Rate | > 1% | Warning |
+| Error Rate | > 5% | Critical |
+| Circuit Breaker Open | Any occurrence | Critical |
+| P95 Response Time | > 1000ms | Warning |
+| P99 Response Time | > 3000ms | Critical |
+| 5xx Errors | > 10/hour | Warning |
+
+### Alerting Strategy
+```splunk
+# Alert: High Error Rate
+index=app_logs sourcetype=ema_api_v1_4 env=PROD earliest=-5m
+| stats count as total, count(eval(status_code>=500)) as errors
+| eval error_rate = (errors/total)*100
+| where error_rate > 5
+| eval alert_message = "CRITICAL: Error rate " + error_rate + "% exceeds 5% threshold"
+```
+
+### Dashboard Panels
+
+1. **Request Volume** - Real-time request counts by endpoint
+2. **Status Code Distribution** - HTTP response code breakdown
+3. **Error Trends** - Time-series error rate visualization
+4. **Circuit Breaker Health** - State transitions and failure counts
+5. **Response Time Heatmap** - Performance distribution by time of day
+6. **Top Errors** - Most frequent error messages with counts
+
+---
 
 ---
 
@@ -548,9 +631,8 @@ This repository showcases real-world enterprise software engineering, demonstrat
 
 **Vijay Soundaram**  
 **GitHub:** [@vijayyovan](https://github.com/vijayyovan)  
-**LinkedIn:** [Add your LinkedIn URL here]  
-**Email:** [Add your email if you wish]
-
+**LinkedIn:**https://www.linkedin.com/in/vijaysoundaram/
+**Email:** vijay6206@gmail.com
 ---
 
 ## 📄 License
