@@ -96,7 +96,7 @@ This project showcases the migration approach for modernizing legacy REST APIs t
 ## 📚 Documentation
 
 ### Core Documentation
-- [📋 **API Contract**](./API_CONTRACT. md) - v1.3 vs v1.4 comparison
+- [📋 **API Contract**](./API_CONTRACT. md) -Legacy vs Modern API comparison
 - [🏗️ **Architecture**](./ARCHITECTURE.md) - System design and patterns
 - [🚀 **Implementation Guide**](./IMPLEMENTATION_GUIDE.md) - Step-by-step migration process
 - [🐛 **Technical Challenges**](./TECHNICAL_CHALLENGES.md) - Problems solved with solutions
@@ -111,7 +111,7 @@ This project showcases the migration approach for modernizing legacy REST APIs t
 
 ## 🚀 API Endpoints
 
-### EventDetail v1.4
+### EventDetail API
 ```bash
 GET /net-ops/ema/event/v1.4/detail/{eventId}
 
@@ -635,7 +635,7 @@ This repository showcases real-world enterprise software engineering, demonstrat
 
 ---
 
-## 📞 Seeking DevOps/Platform Engineering Roles
+## 📞 Seeking DevOps/Platform Engineering Roles/SRE
 
 **Vijay Soundaram** | DevOps Engineer | CKA Certified
 
@@ -647,7 +647,7 @@ This repository showcases real-world enterprise software engineering, demonstrat
 **DevOps Engineer** • **Platform Engineer** • **Site Reliability Engineer (SRE)** • **Cloud Infrastructure Engineer**
 
 ### 🛠️ Key Expertise
-☸️ Kubernetes (CKA) • 🔄 CI/CD (Jenkins, GitLab) • 🏗️ IaC (Terraform, Ansible) • 📊 Monitoring (Splunk, Prometheus) • ☁️ Cloud-Native Architecture • 🔧 Container Orchestration (Rancher, Docker)
+☸️ Kubernetes  • 🔄 CI/CD (Jenkins, GitLab) • 🏗️ IaC (Terraform, Ansible) • 📊 Monitoring (Splunk, Prometheus) • ☁️ Cloud-Native Architecture • 🔧 Container Orchestration (Rancher, Docker)
 
 **17+ years** building and maintaining enterprise-grade infrastructure at scale.
 
