@@ -30,7 +30,12 @@ This project showcases the migration approach for modernizing legacy REST APIs t
 - Modern Solution: Clear response code differentiation (400 vs 204) enabling intelligent downstream error handling
 
 ---
-
+### Executive Summary
+- Migrated 3 legacy REST APIs to a resilient Spring Boot 3.x architecture
+- Standardized ambiguous HTTP responses into contract-driven HTTP semantics
+- Implemented Resilience4j circuit breakers with graceful degradation
+- Achieved up to 65% performance improvement using Oracle result caching
+- Deployed with zero downtime on Kubernetes using rolling updates and HA
 ---
 
 ## 🏆 Key Achievements
