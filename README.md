@@ -1,7 +1,8 @@
 # Enterprise REST API Modernization
 ## Spring Boot & Kubernetes Reference Implementation
 
-> ⚠️ **EDUCATIONAL DEMONSTRATION PROJECT**
+>
+>
 >
 > This is a reference implementation showcasing enterprise software engineering patterns and best practices. It demonstrates architectural approaches, design patterns, and technical solutions I've applied in professional environments. All business logic, data, and system names have been sanitized and genericized for educational and portfolio purposes.
 
