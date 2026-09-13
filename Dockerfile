@@ -15,7 +15,6 @@ public class Main {
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8008), 0);
         server.createContext(LIVENESS_PATH, Main::handleLiveness);
-        server.createContext("/", Main::handleNotFound);
         server.start();
         System.out.println("EMA API hardening-step1 service listening on :8008");
     }
@@ -32,16 +31,6 @@ public class Main {
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(body);
         }
-    }
-
-    private static void handleNotFound(HttpExchange exchange) throws IOException {
-        if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
-            exchange.sendResponseHeaders(405, -1);
-            exchange.close();
-            return;
-        }
-        exchange.sendResponseHeaders(404, -1);
-        exchange.close();
     }
 }
 EOF
