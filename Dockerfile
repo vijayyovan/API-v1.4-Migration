@@ -20,7 +20,7 @@ WORKDIR /app
 COPY --from=builder /app/target/*.jar /app/app.jar
 
 # JVM container/runtime options can be overridden at runtime
-ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75 -XX:InitialRAMPercentage=50 -XX:+ExitOnOutOfMemoryError"
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75 -XX:+ExitOnOutOfMemoryError"
 
 EXPOSE 8008
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
