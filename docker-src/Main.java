@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8008), 0);
         server.createContext(LIVENESS_PATH, Main::handleLiveness);
-        server.setExecutor(Executors.newCachedThreadPool());
+        server.setExecutor(Executors.newFixedThreadPool(4));
         server.start();
         System.out.println("EMA API hardening-step1 service listening on :8008");
     }
