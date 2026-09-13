@@ -23,6 +23,7 @@ public class Main {
     private static void handleLiveness(HttpExchange exchange) throws IOException {
         if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
             exchange.sendResponseHeaders(405, -1);
+            exchange.close();
             return;
         }
         byte[] body = "Alive".getBytes(StandardCharsets.UTF_8);
@@ -36,9 +37,11 @@ public class Main {
     private static void handleNotFound(HttpExchange exchange) throws IOException {
         if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
             exchange.sendResponseHeaders(405, -1);
+            exchange.close();
             return;
         }
         exchange.sendResponseHeaders(404, -1);
+        exchange.close();
     }
 }
 EOF
