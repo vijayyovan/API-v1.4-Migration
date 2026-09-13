@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.Executors;
 
 public class Main {
     private static final String LIVENESS_PATH = "/net-ops/ema/health/v1.4/liveness";
@@ -11,6 +12,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(8008), 0);
         server.createContext(LIVENESS_PATH, Main::handleLiveness);
+        server.setExecutor(Executors.newCachedThreadPool());
         server.start();
         System.out.println("EMA API hardening-step1 service listening on :8008");
     }
