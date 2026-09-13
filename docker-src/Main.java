@@ -16,17 +16,20 @@ public class Main {
     }
 
     private static void handleLiveness(HttpExchange exchange) throws IOException {
-        if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
-            exchange.sendResponseHeaders(405, -1);
-            exchange.close();
-            return;
-        }
+        try {
+            if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+                exchange.sendResponseHeaders(405, -1);
+                return;
+            }
 
-        byte[] body = "Alive".getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
-        exchange.sendResponseHeaders(200, body.length);
-        try (OutputStream os = exchange.getResponseBody()) {
-            os.write(body);
+            byte[] body = "Alive".getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
+            exchange.sendResponseHeaders(200, body.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(body);
+            }
+        } finally {
+            exchange.close();
         }
     }
 }
