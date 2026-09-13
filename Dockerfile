@@ -7,6 +7,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 
 public class Main {
     private static final String LIVENESS_PATH = "/net-ops/ema/health/v1.4/liveness";
@@ -24,7 +25,7 @@ public class Main {
             exchange.sendResponseHeaders(405, -1);
             return;
         }
-        byte[] body = "Alive".getBytes();
+        byte[] body = "Alive".getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
         exchange.sendResponseHeaders(200, body.length);
         try (OutputStream os = exchange.getResponseBody()) {
@@ -33,6 +34,10 @@ public class Main {
     }
 
     private static void handleNotFound(HttpExchange exchange) throws IOException {
+        if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+            exchange.sendResponseHeaders(405, -1);
+            return;
+        }
         exchange.sendResponseHeaders(404, -1);
     }
 }
